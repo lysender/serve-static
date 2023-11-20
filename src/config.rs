@@ -4,6 +4,7 @@ use clap::Parser;
 #[derive(Clone, Debug)]
 pub struct Config {
     pub cors: bool,
+    pub public: bool,
     pub dir: PathBuf,
     pub port: u16,
 }
@@ -17,6 +18,7 @@ impl Config {
 
         Ok(Config {
             cors: args.cors,
+            public: args.public,
             dir: args.dir,
             port: args.port,
         })
@@ -29,6 +31,10 @@ impl Config {
 pub struct Args {
     #[arg(long, short)]
     pub cors: bool,
+
+    /// Expose to local network
+    #[arg(long)]
+    pub public: bool,
 
     #[arg(long, short)]
     pub dir: PathBuf,

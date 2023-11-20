@@ -26,6 +26,7 @@ async fn main() {
         )
     }
 
+    // tracing_subscriber::fmt::init();
     tracing_subscriber::fmt()
         .with_target(false)
         .compact()
@@ -55,7 +56,11 @@ async fn main() {
     }
 
     // Setup the server
-    let addr = SocketAddr::from(([127, 0, 0, 1], config.port));
+    let ip = match config.public {
+        true => [0, 0, 0, 0],
+        false => [127, 0, 0, 1],
+    };
+    let addr = SocketAddr::from((ip, config.port));
     info!("Listening on {}", addr);
 
     axum::Server::bind(&addr)
@@ -67,3 +72,4 @@ async fn main() {
 fn routes_static(dir: &PathBuf) -> Router {
     Router::new().nest_service("/", get_service(ServeDir::new(dir)))
 }
+
