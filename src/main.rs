@@ -1,9 +1,10 @@
 use std::path::PathBuf;
-use std::{process, net::SocketAddr};
+use std::process;
 use axum::http::Method;
 use axum::Router;
 use axum::routing::get_service;
 use clap::Parser;
+use tokio::net::TcpListener;
 use tracing::info;
 use tower_http::cors::{CorsLayer, Any};
 use tower_http::services::ServeDir;
@@ -57,14 +58,14 @@ async fn main() {
 
     // Setup the server
     let ip = match config.public {
-        true => [0, 0, 0, 0],
-        false => [127, 0, 0, 1],
+        true => "0.0.0.0",
+        false => "127.0.0.1",
     };
-    let addr = SocketAddr::from((ip, config.port));
+    let addr = format!("{}:{}", ip, config.port);
     info!("Listening on {}", addr);
 
-    axum::Server::bind(&addr)
-        .serve(routes_all.into_make_service())
+    let listener = TcpListener::bind(addr).await.unwrap();
+    axum::serve(listener, routes_all.into_make_service())
         .await
         .unwrap();
 }
