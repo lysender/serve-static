@@ -1,16 +1,16 @@
+use axum::http::Method;
+use axum::routing::get_service;
+use axum::Router;
+use clap::Parser;
 use std::path::PathBuf;
 use std::process;
-use axum::http::Method;
-use axum::Router;
-use axum::routing::get_service;
-use clap::Parser;
 use tokio::net::TcpListener;
-use tracing::info;
-use tower_http::cors::{CorsLayer, Any};
-use tower_http::services::ServeDir;
 use tower::ServiceBuilder;
+use tower_http::cors::{Any, CorsLayer};
+use tower_http::services::ServeDir;
+use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
+use tracing::info;
 use tracing::Level;
-use tower_http::trace::{TraceLayer, DefaultMakeSpan, DefaultOnResponse};
 
 use config::{Args, Config};
 
@@ -21,10 +21,7 @@ mod error;
 async fn main() {
     // Set the RUST_LOG, if it hasn't been explicitly defined
     if std::env::var_os("RUST_LOG").is_none() {
-        std::env::set_var(
-            "RUST_LOG",
-            "serve_static=info,tower_http=info",
-        )
+        std::env::set_var("RUST_LOG", "serve_static=info,tower_http=info")
     }
 
     // tracing_subscriber::fmt::init();
@@ -39,15 +36,13 @@ async fn main() {
         process::exit(1);
     });
 
-    let mut routes_all = Router::new()
-        .merge(routes_static(&config.dir))
-        .layer(ServiceBuilder::new()
-            .layer(TraceLayer::new_for_http()
+    let mut routes_all = Router::new().merge(routes_static(&config.dir)).layer(
+        ServiceBuilder::new().layer(
+            TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
-            )
-        );
-
+        ),
+    );
 
     if config.cors {
         let cors = CorsLayer::new()
@@ -73,4 +68,3 @@ async fn main() {
 fn routes_static(dir: &PathBuf) -> Router {
     Router::new().nest_service("/", get_service(ServeDir::new(dir)))
 }
-
