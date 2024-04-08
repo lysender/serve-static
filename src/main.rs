@@ -1,8 +1,6 @@
 use axum::http::Method;
 use axum::routing::get_service;
-use axum::Router;
 use clap::Parser;
-use std::path::PathBuf;
 use std::process;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -15,7 +13,6 @@ use tracing::Level;
 use config::{Args, Config};
 
 mod config;
-mod error;
 
 #[tokio::main]
 async fn main() {
@@ -36,7 +33,7 @@ async fn main() {
         process::exit(1);
     });
 
-    let mut routes_all = Router::new().merge(routes_static(&config.dir)).layer(
+    let mut routes_all = get_service(ServeDir::new(&config.dir)).layer(
         ServiceBuilder::new().layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
@@ -63,8 +60,4 @@ async fn main() {
     axum::serve(listener, routes_all.into_make_service())
         .await
         .unwrap();
-}
-
-fn routes_static(dir: &PathBuf) -> Router {
-    Router::new().nest_service("/", get_service(ServeDir::new(dir)))
 }
