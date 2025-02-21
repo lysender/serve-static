@@ -7,21 +7,19 @@ use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
-use tracing::info;
 use tracing::Level;
+use tracing::info;
 
 use config::{Args, Config};
 
 mod config;
+mod error;
+
+// Re-exports
+pub use error::{Error, Result};
 
 #[tokio::main]
 async fn main() {
-    // Set the RUST_LOG, if it hasn't been explicitly defined
-    if std::env::var_os("RUST_LOG").is_none() {
-        std::env::set_var("RUST_LOG", "serve_static=info,tower_http=info")
-    }
-
-    // tracing_subscriber::fmt::init();
     tracing_subscriber::fmt()
         .with_target(false)
         .compact()
@@ -45,6 +43,7 @@ async fn main() {
         let cors = CorsLayer::new()
             .allow_methods([Method::GET, Method::POST])
             .allow_origin(Any);
+
         routes_all = routes_all.layer(cors).to_owned();
     }
 

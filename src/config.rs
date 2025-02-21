@@ -1,6 +1,8 @@
 use clap::Parser;
 use std::path::PathBuf;
 
+use crate::Result;
+
 #[derive(Clone, Debug)]
 pub struct Config {
     pub cors: bool,
@@ -10,10 +12,10 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: Args) -> Result<Config, &'static str> {
+    pub fn build(args: Args) -> Result<Config> {
         // Check whether the dir is valid
         if !args.dir.is_dir() {
-            return Err("Dir must exist.");
+            return Err("Dir must exist.".into());
         }
 
         Ok(Config {
