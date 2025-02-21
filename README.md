@@ -1,20 +1,8 @@
 # Serve Static
 
-Rust application that creates an HTTP server and serves the specified directory.
+HTTP server that serves files from the specified directory.
 
-## Usage
-
-```text
-Usage: serve-static.exe [OPTIONS] --dir <DIR>
-
-Options:
-  -c, --cors
-      --public       Expose to local network
-  -d, --dir <DIR>
-  -p, --port <PORT>  Local port [default: 3000]
-  -h, --help         Print help
-  -V, --version      Print version
-```
+Written in Rust.
 
 ## Demo files
 
@@ -34,8 +22,22 @@ Then visit the following urls:
 cargo build --release
 ```
 
-Then copy the executable from `target/release/serve-static(.exe)` to your $PATH.
+Then copy the executable from `target/release/serve-static` to your $PATH.
 
 ```shell
 serve-static -c -d html -p 8080
+```
+
+## Usage
+
+```text
+Usage: serve-static [OPTIONS] --dir <DIR>
+
+Options:
+  -c, --cors
+      --public       Expose to local network
+  -d, --dir <DIR>
+  -p, --port <PORT>  Local port [default: 3000]
+  -h, --help         Print help
+  -V, --version      Print version
 ```
